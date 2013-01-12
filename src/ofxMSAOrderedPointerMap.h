@@ -17,9 +17,17 @@ namespace msa {
         int size() const;
         
         // add new item
+        // item will be cloned, stored internally and added to an stl::map and stl::vector as a pointer
         // pointer will be owned and deleted by this class
-        // returns the pointer added
+        // returns a reference to the new pointer added
         T& push_back(string name, const T& t);
+        
+        // add new item
+        // this pointer will be added directly to the stl::map and stl::vector
+        // pointer will be owned and deleted by this class
+        // returns a reference to the (same) pointer
+        T& push_back(string name, T* t);
+
         
         // return reference to the stored object
         // throws an exception of the index or name doesn't exist
@@ -39,7 +47,7 @@ namespace msa {
         bool exists(string name) const;
         
         // clear, and delete pointers
-        void clear(bool bDeletePointers = true);
+        void clear();
         
     private:
         map<string, T*> _map;
@@ -50,13 +58,13 @@ namespace msa {
     //--------------------------------------------------------------
     template<typename T>
     OrderedPointerMap<T>::~OrderedPointerMap() {
-        clear(true);
+        clear();
     }
     
     //--------------------------------------------------------------
     template<typename T>
-    void OrderedPointerMap<T>::clear(bool bDeletePointers) {
-        if(bDeletePointers) for(int i=0; i<_vector.size(); i++) delete _vector[i].second;
+    void OrderedPointerMap<T>::clear() {
+        for(int i=0; i<_vector.size(); i++) delete _vector[i].second;
         _vector.clear();
         _map.clear();
     }
@@ -64,7 +72,6 @@ namespace msa {
     //--------------------------------------------------------------
     template<typename T>
     int OrderedPointerMap<T>::size() const {
-//        assert(_vector.size() == _map.size());	// probably tried to add with the same name
         return _map.size();
     }
     
@@ -75,11 +82,22 @@ namespace msa {
             ofLogError() << "msa::ControlFreak::OrderedPointerMap<T>::push_back: " << name << " - name already exists, returning existing";
             return *_map[name];
         } else {
-            T* tt = new T(t);
-            _map[name] = tt;
-            _vector.push_back(pair<string, T*>(name, tt));
+            return push_back(name, new T(t));
+        }
+    }
+    
+    
+    //--------------------------------------------------------------
+    template<typename T>
+    T& OrderedPointerMap<T>::push_back(string name, T* t) {
+        if(exists(name)) {
+            ofLogError() << "msa::ControlFreak::OrderedPointerMap<T>::push_back: " << name << " - name already exists, returning existing";
+            return *_map[name];
+        } else {
+            _map[name] = t;
+            _vector.push_back(pair<string, T*>(name, t));
             size();	// to check if correctly added to both containers, should be ok
-            return *tt;
+            return *t;
         }
     }
     
