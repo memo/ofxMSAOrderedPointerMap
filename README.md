@@ -3,7 +3,7 @@ ofxMSAOrderedPointerMap
 
 Introduction
 ------------
-C++ template class (openFrameworks addon) to create an ordered named map of pointers (wraps stl::vector and stl::map).
+C++ template class (openFrameworks addon) to create an ordered named map of pointers (wraps stl::vector and stl::map).  
 See super minimal example it that isn't clear. 
 
 Licence
@@ -23,7 +23,8 @@ none
 
 Compatibility
 ------------
-Any C++ application. The logging uses the openFrameworks ofLogXXX functions. these can be commented out or replaced with C/C++ standard outputs (e.g. printf or cout)
+Any C++ application.  
+The logging uses the openFrameworks ofLog functions. These can be commented out or replaced with C/C++ standard outputs (e.g. printf or cout) if need be.
 
 
 Known issues
