@@ -4,7 +4,8 @@ ofxMSAOrderedPointerMap
 Introduction
 ------------
 C++ template class (openFrameworks addon) to create an ordered named map of pointers (wraps stl::vector and stl::map).  
-See super minimal example it that isn't clear. 
+See super minimal example if that isn't clear. 
+[https://github.com/memo/ofxMSAOrderedPointerMap/blob/master/example/src/testApp.cpp](https://github.com/memo/ofxMSAOrderedPointerMap/blob/master/example/src/testApp.cpp)
 
 Licence
 -------
