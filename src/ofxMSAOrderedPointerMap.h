@@ -40,8 +40,11 @@ namespace msa {
         T& operator[](string name) const;
         T& operator[](const char* name) const;
         
-        // get the name for item at index
-        string nameAt(int index) const;
+        // get the name for item at index. returns "" if doesn't exist
+        string nameFor(int index) const;
+        
+        // get the index for item with name. returns -ve if doesn't exist
+        int indexFor(string name) const;
         
         // see if name exists
         bool exists(string name) const;
@@ -50,7 +53,7 @@ namespace msa {
         void clear();
         
     private:
-        map<string, T*> _map;
+        map<string, pair<int, T*> > _map;
         vector< pair<string, T*> >	_vector;
     };
     
@@ -72,7 +75,7 @@ namespace msa {
     //--------------------------------------------------------------
     template<typename T>
     int OrderedPointerMap<T>::size() const {
-        return _map.size();
+        return _vector.size();
     }
     
     //--------------------------------------------------------------
@@ -80,7 +83,7 @@ namespace msa {
     T& OrderedPointerMap<T>::push_back(string name, const T& t) {
         if(exists(name)) {
             ofLogError() << "msa::ControlFreak::OrderedPointerMap<T>::push_back: " << name << " - name already exists, returning existing";
-            return *_map[name];
+            return *_map[name].second;
         } else {
             return push_back(name, new T(t));
         }
@@ -92,10 +95,10 @@ namespace msa {
     T& OrderedPointerMap<T>::push_back(string name, T* t) {
         if(exists(name)) {
             ofLogError() << "msa::ControlFreak::OrderedPointerMap<T>::push_back: " << name << " - name already exists, returning existing";
-            return *_map[name];
+            return at(name);
         } else {
-            _map[name] = t;
             _vector.push_back(pair<string, T*>(name, t));
+            _map[name] = pair<int, T*>(_vector.size()-1, t);
             size();	// to check if correctly added to both containers, should be ok
             return *t;
         }
@@ -114,7 +117,7 @@ namespace msa {
     T& OrderedPointerMap<T>::at(string name) const {
         // make sure the name exists (don't add it by mistake)
 //        return exists(name) ? *_map.at(name) : T();
-        return *_map.at(name);
+        return *_map.at(name).second;
     }
     
     //--------------------------------------------------------------
@@ -137,9 +140,16 @@ namespace msa {
     
     //--------------------------------------------------------------
     template<typename T>
-    string OrderedPointerMap<T>::nameAt(int index) const {
+    string OrderedPointerMap<T>::nameFor(int index) const {
         return _vector.size() && ofInRange(index, 0, _vector.size()-1) ? _vector[index].first : "";
     }
+    
+    //--------------------------------------------------------------
+    template<typename T>
+    int OrderedPointerMap<T>::indexFor(string name) const {
+        return exists(name) ? _map.at(name).first : -1;
+    }
+
     
     //--------------------------------------------------------------
     template<typename T>

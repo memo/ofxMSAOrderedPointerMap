@@ -65,8 +65,16 @@ void testApp::setup() {
     outputStream << endl << endl << "accessing and modifying via index (make 1 year older).." << endl;
     for(int i=0; i<a.size(); i++) {
         a[i].age ++;
-        outputStream << a.nameAt(i) << " - " << a[i].toString() << endl;
+        outputStream << a.nameFor(i) << " - " << a[i].toString() << endl;
     }
+    
+    // getting index for name
+    outputStream << endl << endl << "accessing and modifying via index (make 1 year older).." << endl;
+    outputStream << "memo - " << a.indexFor("memo") << endl;
+    outputStream << "jane - " << a.indexFor("jane") << endl;
+    outputStream << "pearl - " << a.indexFor("pearl") << endl;
+    outputStream << "bruce - " << a.indexFor("bruce") << endl;
+
     
 }
 
