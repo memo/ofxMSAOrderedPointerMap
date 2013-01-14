@@ -20,7 +20,7 @@ public:
 
 
 // create an ordered named map of PersonData pointers
-msa::OrderedPointerMap<PersonData> a;
+msa::OrderedPointerMap<string, PersonData> a;
 
 
 // this will store our output
