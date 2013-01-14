@@ -62,19 +62,34 @@ void testApp::setup() {
 
     
     // accessing via index
-    outputStream << endl << endl << "accessing and modifying via index (make 1 year older).." << endl;
+    outputStream << endl << endl << "accessing and modifying via index (make 1 year older)..." << endl;
     for(int i=0; i<a.size(); i++) {
         a[i].age ++;
-        outputStream << a.nameFor(i) << " - " << a[i].toString() << endl;
+        outputStream << a.keyFor(i) << " - " << a[i].toString() << endl;
     }
     
     // getting index for name
-    outputStream << endl << endl << "accessing and modifying via index (make 1 year older).." << endl;
+    outputStream << endl << endl << "accessing and modifying via index (make 1 year older)..." << endl;
     outputStream << "memo - " << a.indexFor("memo") << endl;
     outputStream << "jane - " << a.indexFor("jane") << endl;
     outputStream << "pearl - " << a.indexFor("pearl") << endl;
     outputStream << "bruce - " << a.indexFor("bruce") << endl;
 
+    // erase by index
+    outputStream << endl << endl << "erase by index... erase(1)" << endl;
+    a.erase(1); // erasing jane
+    for(int i=0; i<a.size(); i++) {
+        outputStream << a.keyFor(i) << " - " << a[i].toString() << endl;
+    }
+    
+    // erase by key
+    outputStream << endl << endl << "erase by key... erase('bruce') " << endl;
+    a.erase("bruce"); // erasing bruce
+    for(int i=0; i<a.size(); i++) {
+        outputStream << a.keyFor(i) << " - " << a[i].toString() << endl;
+    }
+
+    
     
 }
 
