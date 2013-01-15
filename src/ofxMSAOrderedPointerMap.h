@@ -87,8 +87,8 @@ namespace msa {
     template<typename keyType, typename T>
     T& OrderedPointerMap<keyType, T>::push_back(const keyType& key, const T& t) {
         if(exists(key)) {
-            ofLogError() << "msa::ControlFreak::OrderedPointerMap<keyType, T>::push_back: " << key << " - key already exists, returning existing";
-            return *_map[key].second;
+            ofLogError() << "msa::ControlFreak::OrderedPointerMap<keyType, T>::push_back: key already exists, returning existing";
+            return at(key);
         } else {
             return push_back(key, new T(t));
         }
@@ -99,7 +99,7 @@ namespace msa {
     template<typename keyType, typename T>
     T& OrderedPointerMap<keyType, T>::push_back(const keyType& key, T* t) {
         if(exists(key)) {
-            ofLogError() << "msa::ControlFreak::OrderedPointerMap<keyType, T>::push_back: " << key << " - key already exists, returning existing";
+            ofLogError() << "msa::ControlFreak::OrderedPointerMap<keyType, T>::push_back: key already exists, returning existing";
             return at(key);
         } else {
             _vector.push_back(pair<keyType, T*>(key, t));
@@ -146,7 +146,7 @@ namespace msa {
     //--------------------------------------------------------------
     template<typename keyType, typename T>
     keyType OrderedPointerMap<keyType, T>::keyFor(int index) const {
-        return _vector.size() && ofInRange(index, 0, _vector.size()-1) ? _vector[index].first : "";
+        return _vector.size() && ofInRange(index, 0, _vector.size()-1) ? _vector[index].first : keyType();
     }
     
     //--------------------------------------------------------------
@@ -161,7 +161,7 @@ namespace msa {
         keyType key = keyFor(index);
         _map.erase(key);
         _vector.erase(_vector.begin() + index);
-        ofLogNotice() << _map.size() << ", " << _vector.size();
+//        ofLogNotice() << _map.size() << ", " << _vector.size();
         size(); // check map and vector have same sizes
     }
     
@@ -172,9 +172,9 @@ namespace msa {
         if(index >= 0) {
             _map.erase(key);
             _vector.erase(_vector.begin() + index);
-            ofLogNotice() << _map.size() << ", " << _vector.size();
+//            ofLogNotice() << _map.size() << ", " << _vector.size();
         } else {
-            ofLogError() << "msa::ControlFreak::OrderedPointerMap<keyType, T>::erase: " << key << " - key doesn't exist";
+            ofLogError() << "msa::ControlFreak::OrderedPointerMap<keyType, T>::erase: key doesn't exist";
         }
         size(); // check map and vector have same sizes
     }
