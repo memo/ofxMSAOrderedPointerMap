@@ -88,6 +88,16 @@ void testApp::setup() {
     for(int i=0; i<a.size(); i++) {
         outputStream << a.keyFor(i) << " - " << a[i].toString() << endl;
     }
+    
+    
+    // change key
+    outputStream << endl << endl << "change key..." << endl;
+    a.changeKey(0, "mehmet");
+    a.changeKey("pearl", "pearlikens");
+    for(int i=0; i<a.size(); i++) {
+        outputStream << a.keyFor(i) << " - " << a[i].toString() << endl;
+    }
+
 
     
     
