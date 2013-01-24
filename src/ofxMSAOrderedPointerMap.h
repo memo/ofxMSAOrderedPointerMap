@@ -223,7 +223,7 @@ namespace msa {
     //--------------------------------------------------------------
     template<typename keyType, typename T>
     void OrderedPointerMap<keyType, T>::validateKey(const keyType& key, string errorMessage) const {
-        if(!exists(key)) throw invalid_argument(errorMessage + " - " + "key doesn't exist");
+        if(!exists(key)) throw invalid_argument(errorMessage + " - key doesn't exist");
     }
 
     
