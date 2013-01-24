@@ -99,7 +99,7 @@ void testApp::setup() {
     }
 
 
-    
+    cout << outputStream.str();
     
 }
 
