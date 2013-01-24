@@ -63,8 +63,8 @@ namespace msa {
         map<keyType, pair<int, T*> > _map;
         vector< pair<keyType, T*> >	_vector;
         
-        void validateIndex(int index, string functionName, string errorMessage = "index doesn't exist") const;
-        void validateKey(const keyType& key, string functionName, string errorMessage = "key doesn't exist") const;
+        void validateIndex(int index, string errorMessage) const;
+        void validateKey(const keyType& key, string errorMessage) const;
         
         // if something is erased, the indices in the map need to be updated
         void updateMapIndices();
@@ -216,14 +216,14 @@ namespace msa {
 
     //--------------------------------------------------------------
     template<typename keyType, typename T>
-    void OrderedPointerMap<keyType, T>::validateIndex(int index, string functionName, string errorMessage) const {
-        if(index<0 || index >= _vector.size()) throw invalid_argument(functionName + " " + errorMessage);
+    void OrderedPointerMap<keyType, T>::validateIndex(int index, string errorMessage) const {
+        if(index<0 || index >= _vector.size()) throw invalid_argument(errorMessage + " - index doesn't exist");
     }
     
     //--------------------------------------------------------------
     template<typename keyType, typename T>
-    void OrderedPointerMap<keyType, T>::validateKey(const keyType& key, string functionName, string errorMessage) const {
-        if(!exists(key)) throw invalid_argument(functionName + " " + errorMessage);
+    void OrderedPointerMap<keyType, T>::validateKey(const keyType& key, string errorMessage) const {
+        if(!exists(key)) throw invalid_argument(errorMessage + " - " + "key doesn't exist");
     }
 
     
