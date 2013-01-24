@@ -38,7 +38,6 @@ namespace msa {
         // these also throw an exception if the index or key doesn't exist
         T& operator[](int index) const;
         T& operator[](const keyType& key) const;
-//        T& operator[](const char* key) const;
         
         // get the key for item at index. returns "" if doesn't exist
         keyType keyFor(int index) const;
@@ -64,6 +63,9 @@ namespace msa {
         map<keyType, pair<int, T*> > _map;
         vector< pair<keyType, T*> >	_vector;
         
+        void validateIndex(int index, string functionName, string errorMessage = "index doesn't exist") const;
+        void validateKey(const keyType& key, string functionName, string errorMessage = "key doesn't exist") const;
+        
         // if something is erased, the indices in the map need to be updated
         void updateMapIndices();
     };
@@ -86,7 +88,8 @@ namespace msa {
     //--------------------------------------------------------------
     template<typename keyType, typename T>
     int OrderedPointerMap<keyType, T>::size() const {
-        assert(_map.size() == _vector.size());  // if these aren't equal, something went wrong somewhere. not good!
+        // if these aren't equal, something went wrong somewhere. not good!
+        if(_map.size() != _vector.size()) throw runtime_error("msa::OrderedPointerMap::size() - map size doesn't equal vector size");
         return _vector.size();
     }
     
@@ -94,24 +97,23 @@ namespace msa {
     template<typename keyType, typename T>
     T& OrderedPointerMap<keyType, T>::push_back(const keyType& key, const T& t) {
         if(exists(key)) {
-            ofLogError() << "msa::ControlFreak::OrderedPointerMap<keyType, T>::push_back: key already exists, returning existing";
+            throw invalid_argument("msa::ControlFreak::OrderedPointerMap::push_back(keyType, T&) - key already exists");
             return at(key);
         } else {
             return push_back(key, new T(t));
         }
     }
     
-    
     //--------------------------------------------------------------
     template<typename keyType, typename T>
     T& OrderedPointerMap<keyType, T>::push_back(const keyType& key, T* t) {
         if(exists(key)) {
-            ofLogError() << "msa::ControlFreak::OrderedPointerMap<keyType, T>::push_back: key already exists, returning existing";
+            throw invalid_argument("msa::ControlFreak::OrderedPointerMap::push_back(keyType, T*) - key already exists");
             return at(key);
         } else {
             _vector.push_back(pair<keyType, T*>(key, t));
             _map[key] = pair<int, T*>(_vector.size()-1, t);
-            size();	// to check if correctly added to both containers, should be ok
+            size();	// to validate if correctly added to both containers, should be ok
             return *t;
         }
     }
@@ -119,16 +121,14 @@ namespace msa {
     //--------------------------------------------------------------
     template<typename keyType, typename T>
     T& OrderedPointerMap<keyType, T>::at(int index) const {
-        // make sure there is something in the array, and index is within the range
-//        return _vector.size() && ofInRange(index, 0, _vector.size()-1) ? *_vector[index].second : T();
-        return *_vector.at(index).second;
+        validateIndex(index, "msa::ControlFreak::OrderedPointerMap::at(int)");
+        return *_vector[index].second;
     }
     
     //--------------------------------------------------------------
     template<typename keyType, typename T>
     T& OrderedPointerMap<keyType, T>::at(const keyType& key) const {
-        // make sure the key exists (don't add it by mistake)
-//        return exists(key) ? *_map.at(key) : T();
+        validateKey(key, "msa::ControlFreak::OrderedPointerMap::at(keyType)");
         return *_map.at(key).second;
     }
     
@@ -145,26 +145,24 @@ namespace msa {
     }
     
     //--------------------------------------------------------------
-//    template<typename keyType, typename T>
-//    T& OrderedPointerMap<keyType, T>::operator[](const char* key) const {
-//        return at(key);
-//    }
-    
-    //--------------------------------------------------------------
     template<typename keyType, typename T>
     keyType OrderedPointerMap<keyType, T>::keyFor(int index) const {
-        return _vector.size() && ofInRange(index, 0, _vector.size()-1) ? _vector[index].first : keyType();
+        validateIndex(index, "msa::ControlFreak::OrderedPointerMap::keyFor(int)");
+        return _vector[index].first;
     }
     
     //--------------------------------------------------------------
     template<typename keyType, typename T>
     int OrderedPointerMap<keyType, T>::indexFor(const keyType& key) const {
-        return exists(key) ? _map.at(key).first : -1;
+        validateKey(key, "msa::ControlFreak::OrderedPointerMap::indexFor(keyType)");
+        return _map.at(key).first;
     }
     
     //--------------------------------------------------------------
     template<typename keyType, typename T>
     void OrderedPointerMap<keyType, T>::changeKey(int index, const keyType& newKey) {
+        validateIndex(index, "msa::ControlFreak::OrderedPointerMap::changeKey(int)");
+
         // erase from map, and reinsert
         _map.erase(keyFor(index));
         _map[newKey] = pair<int, T*>(index, _vector[index].second);
@@ -176,6 +174,7 @@ namespace msa {
     //--------------------------------------------------------------
     template<typename keyType, typename T>
     void OrderedPointerMap<keyType, T>::changeKey(const keyType& oldKey, const keyType& newKey) {
+        validateKey(oldKey, "msa::ControlFreak::OrderedPointerMap::changeKey(keyType)");
         changeKey(indexFor(oldKey), newKey);
     }
     
@@ -184,17 +183,18 @@ namespace msa {
     //--------------------------------------------------------------
     template<typename keyType, typename T>
     void OrderedPointerMap<keyType, T>::erase(int index) {
+        validateIndex(index, "msa::ControlFreak::OrderedPointerMap::erase(int)");
         keyType key = keyFor(index);
         _map.erase(key);
         _vector.erase(_vector.begin() + index);
         updateMapIndices();
-//        ofLogNotice() << _map.size() << ", " << _vector.size();
-        size(); // check map and vector have same sizes
+        size(); // validate map and vector have same sizes to make sure everything worked alright
     }
     
     //--------------------------------------------------------------
     template<typename keyType, typename T>
     void OrderedPointerMap<keyType, T>::erase(const keyType& key) {
+        validateKey(key, "msa::ControlFreak::OrderedPointerMap::erase(keyType)");
         int index = indexFor(key);
         if(index >= 0) {
             _map.erase(key);
@@ -204,7 +204,7 @@ namespace msa {
         } else {
             ofLogError() << "msa::ControlFreak::OrderedPointerMap<keyType, T>::erase: key doesn't exist";
         }
-        size(); // check map and vector have same sizes
+        size(); // validate map and vector have same sizes
     }
 
     
@@ -214,6 +214,19 @@ namespace msa {
         return _map.find(key) != _map.end();
     }
 
+    //--------------------------------------------------------------
+    template<typename keyType, typename T>
+    void OrderedPointerMap<keyType, T>::validateIndex(int index, string functionName, string errorMessage) const {
+        if(index<0 || index >= _vector.size()) throw invalid_argument(functionName + " " + errorMessage);
+    }
+    
+    //--------------------------------------------------------------
+    template<typename keyType, typename T>
+    void OrderedPointerMap<keyType, T>::validateKey(const keyType& key, string functionName, string errorMessage) const {
+        if(!exists(key)) throw invalid_argument(functionName + " " + errorMessage);
+    }
+
+    
     //--------------------------------------------------------------
     template<typename keyType, typename T>
     void OrderedPointerMap<keyType, T>::updateMapIndices() {
