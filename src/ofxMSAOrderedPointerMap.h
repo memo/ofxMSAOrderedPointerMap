@@ -11,6 +11,7 @@ namespace msa {
     class OrderedPointerMap {
     public:
         
+        OrderedPointerMap();
         virtual ~OrderedPointerMap();
         
         // get size
@@ -18,13 +19,13 @@ namespace msa {
         
         // add new item
         // item will be cloned, stored internally and added to an stl::map and stl::vector as a pointer
-        // pointer will be owned and deleted by this class
+        // pointer will be owned and deleted by this class (unless set to not own, see below)
         // returns a reference to the new pointer added
         T& push_back(const keyType& key, const T& t);
         
         // add new item
         // this pointer will be added directly to the stl::map and stl::vector
-        // pointer will be owned and deleted by this class
+        // pointer will be owned and deleted by this class (unless set to not own, see below)
         // returns a reference to the (same) pointer
         T& push_back(const keyType& key, T* t);
 
@@ -56,19 +57,39 @@ namespace msa {
         void erase(int index);
         void erase(const keyType& key);
         
-        // clear, and delete pointers
+        // set or get whether the instance of OrderedPointerMap owns the objects
+        // if OwnsObjects is true (default), all pointers will be deleted automatically (i.e. when erasing items or destroying the container)
+        // otherwise, it's the apps responsibility to delete the pointers
+        void setOwnsObjects(bool b);
+        bool getOwnsObjects();
+        
+        // clear, and delete pointers (if owns them)
         void clear();
+        
+
+        // ADVANCED
+        // if you know the index and the key
+        // fast erase without any validity checks
+        void fastErase(int index, const keyType& key);
         
     private:
         map<keyType, pair<int, T*> > _map;
         vector< pair<keyType, T*> >	_vector;
+        bool _bOwnsObjects;
         
         void validateIndex(int index, string errorMessage) const;
         void validateKey(const keyType& key, string errorMessage) const;
         
+        
         // if something is erased, the indices in the map need to be updated
         void updateMapIndices();
     };
+    
+    //--------------------------------------------------------------
+    template<typename keyType, typename T>
+    OrderedPointerMap<keyType, T>::OrderedPointerMap() {
+        setOwnsObjects(true);
+    }
     
     
     //--------------------------------------------------------------
@@ -80,7 +101,10 @@ namespace msa {
     //--------------------------------------------------------------
     template<typename keyType, typename T>
     void OrderedPointerMap<keyType, T>::clear() {
-        for(int i=0; i<_vector.size(); i++) delete _vector[i].second;
+        if(_bOwnsObjects) {
+            for(int i=0; i<_vector.size(); i++) delete _vector[i].second;
+        }
+        
         _vector.clear();
         _map.clear();
     }
@@ -184,10 +208,7 @@ namespace msa {
     template<typename keyType, typename T>
     void OrderedPointerMap<keyType, T>::erase(int index) {
         validateIndex(index, "msa::ControlFreak::OrderedPointerMap::erase(int)");
-        keyType key = keyFor(index);
-        _map.erase(key);
-        _vector.erase(_vector.begin() + index);
-        updateMapIndices();
+        fastErase(index, keyFor(index));
         size(); // validate map and vector have same sizes to make sure everything worked alright
     }
     
@@ -195,19 +216,33 @@ namespace msa {
     template<typename keyType, typename T>
     void OrderedPointerMap<keyType, T>::erase(const keyType& key) {
         validateKey(key, "msa::ControlFreak::OrderedPointerMap::erase(keyType)");
-        int index = indexFor(key);
-        if(index >= 0) {
-            _map.erase(key);
-            _vector.erase(_vector.begin() + index);
-            updateMapIndices();
-//            ofLogNotice() << _map.size() << ", " << _vector.size();
-        } else {
-            ofLogError() << "msa::ControlFreak::OrderedPointerMap<keyType, T>::erase: key doesn't exist";
-        }
-        size(); // validate map and vector have same sizes
+        fastErase(indexFor(key), key);
+        size(); // validate map and vector have same sizes to make sure everything worked alright
     }
 
     
+    //--------------------------------------------------------------
+    template<typename keyType, typename T>
+    void OrderedPointerMap<keyType, T>::fastErase(int index, const keyType& key) {
+        if(_bOwnsObjects) delete _vector[index].second;
+        _map.erase(key);
+        _vector.erase(_vector.begin() + index);
+        updateMapIndices();
+    }
+
+    //--------------------------------------------------------------
+    template<typename keyType, typename T>
+    void OrderedPointerMap<keyType, T>::setOwnsObjects(bool b) {
+        _bOwnsObjects = b;
+    }
+    
+    //--------------------------------------------------------------
+    template<typename keyType, typename T>
+    bool OrderedPointerMap<keyType, T>::getOwnsObjects() {
+        return _bOwnsObjects;
+    }
+    
+
     //--------------------------------------------------------------
     template<typename keyType, typename T>
     bool OrderedPointerMap<keyType, T>::exists(const keyType& key) const {
