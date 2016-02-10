@@ -4,13 +4,12 @@ ofxMSAOrderedPointerMap
 Introduction
 ------------
 C++ template class (openFrameworks addon) to create an ordered named map of pointers (wraps stl::vector and stl::map).  
-See super minimal example if that isn't clear. 
-[https://github.com/memo/ofxMSAOrderedPointerMap/blob/master/example/src/testApp.cpp](https://github.com/memo/ofxMSAOrderedPointerMap/blob/master/example/src/testApp.cpp)
+This addon is pretty much obselete now, instead I use ofxMSAOrderedMap + std::shared_ptr
 
 Licence
 -------
 The code in this repository is available under the [MIT License](https://secure.wikimedia.org/wikipedia/en/wiki/Mit_license).  
-Copyright (c) 2008-2012 Memo Akten, [www.memo.tv](http://www.memo.tv)  
+Copyright (c) 2008-2016 Memo Akten, [www.memo.tv](http://www.memo.tv)  
 The Mega Super Awesome Visuals Company
 
 
